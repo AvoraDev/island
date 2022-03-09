@@ -26,11 +26,11 @@ const dirLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
    scene.add( dirLight );
 
 // set perspective
-const controls = new OrbitControls(camera, renderer.domElement); // causing isssues joriejiorekljrje
+// const controls = new OrbitControls(camera, renderer.domElement); // causing isssues joriejiorekljrje
 // camera.up.set( 0, 0, 1 ); //set z to up
 camera.position.set( 0, 5, 10 ); // change location of the camera
 camera.lookAt( new THREE.Vector3( 0, 0, 0 ) ); // look at the center of the scene
-controls.update();
+// controls.update();
 
 
 // box thing
