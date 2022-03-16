@@ -31,8 +31,9 @@ class PlayerModel {
       };
       
       // player speeds
-      this.movementSpeed = 0.1;
-      this.jumpSpeed = 0.07;
+      this.movementSpeed = 0.05;
+      this.jumpSpeed = 0.06;
+      this.jumpHeight = this.size * 2;
       
       // jump handlers
       this.jumpEnabled = false;
@@ -64,6 +65,10 @@ class PlayerModel {
       // draw model
       this.drawBody();
       this.drawEyes();
+      
+      // enable/disable shadows
+      this.group.castShadow = true;
+      this.group.receiveShadow = true;
       
       // move model to prevent clipping
       this.group.position.y = this.size / 2;
@@ -231,17 +236,21 @@ class PlayerModel {
 }
 
 class Tree {
-   constructor(size, pos) {
+   constructor(size, leafColor, pos) {
       this.group = new THREE.Group();
       this.size = size;
       this.color = {
-         leaves: 0x32620D,
+         leaves: leafColor,
          trunk: 0x49011d
       };
       
       // draw tree
       this.drawTree();
       
+      // enable/disable shadows
+      this.group.castShadow = true;
+      this.group.receiveShadow = true;
+
       // move tree
       this.group.position.set(pos.x, pos.y, pos.z);
    }
@@ -278,15 +287,40 @@ class Tree {
       this.group.position.set(0, this.size / 2, 0);
    }
 }
-function generateTree(size, pos) {
+function spawnTree(size, color, pos) {
    trees.push(
       new Tree(
          size,
+         color,
          {x: pos.x, y: size / 2, z: pos.z}
       )
    );
    
    scene.add(trees[trees.length - 1].group);
+}
+function generateForest(amount, minSize, maxSize, minPos, maxPos) {
+   for (let i = 0; i < amount; i++) {
+      // get random x and z coordinates
+      let randX = getRandFloat(minPos, maxPos);
+      let randZ = getRandFloat(minPos, maxPos);
+      
+      // get leaf color (small chance to get a red tree)
+      let leafColor = getRandFloat(0, 1) > 0.9 ? 0xd1a101 : 0x32620D;
+      
+      spawnTree(
+         // size
+         getRandFloat(minSize, maxSize),
+         
+         // color 
+         leafColor,
+         
+         // position
+         {
+            x: randX,
+            z: randZ
+         }
+      );
+   }
 }
 
 // ----------------------------------
@@ -294,15 +328,20 @@ function generateTree(size, pos) {
 // ----------------------------------
 
 // test models
-// presets: cube (1), l-piece(2)
+// presets: normal-map cube (1), l-piece(2)
 class TestModel {
-   constructor(preset, size) {
+   constructor(preset, size, material) {
       this.group = new THREE.Group();
       this.size = size;
+      this.material = material; // for plane only
       this.preset = preset;
       
       // draw selected preset model;
       this.selectPreset(this.preset);
+      
+      // enable/disable shadows
+      this.group.castShadow = true;
+      this.group.receiveShadow = true;
    }
    selectPreset(preset) {
       switch (preset) {
@@ -314,6 +353,10 @@ class TestModel {
             this.drawLPiece();
             break;
             
+         case 3:
+            this.drawPlane();
+            break;
+            
          default:
             this.drawSquare();
       }
@@ -321,7 +364,7 @@ class TestModel {
    drawCube() {
       let cube = new THREE.Mesh(
          new THREE.BoxGeometry(this.size, this.size, this.size),
-         new THREE.MeshLambertMaterial({color: 0x000000})
+         new THREE.MeshNormalMaterial()
       );
       this.group.add(cube);
       this.group.position.set(0, this.size / 2, 0);
@@ -356,6 +399,13 @@ class TestModel {
       this.group.add(cube4);
       
       this.group.position.set(0, this.size / 2, 0);
+   }
+   drawPlane() {
+      const plane = new THREE.Mesh(
+         new THREE.PlaneBufferGeometry(this.size, this.size),
+         this.material
+      );
+      this.group.add(plane);
    }
    spin(axis, speed) {
       this.group.rotation[axis] += speed;
