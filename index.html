@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
    <meta charset="UTF-8">
-   <title>Title</title>
+   <title>3d Testing</title>
    <style>
       body {
        margin: 0;
@@ -10,11 +10,17 @@
    </style>
 </head>
 <body>
-   <!--three.js stuff-->
-   <script src="./js/three.js" type="text/javascript"></script>
+   <div style="position:fixed; margin: 10px"><p id="debug">placeholder</p></div>
+   
+   <!--GSAP-->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+   <!--three.js-->
+   <script src="./js/RGBELoader.js" type="text/javascript"></script>
+   <script src="./js/FlakesTexture.js" type="text/javascript"></script>
    <script src="./js/OrbitControls.js" type="text/javascript"></script>
-   <script src="./js/GLTFLoader.js" type="text/javascript"></script>
+   <script src="./build/three.js" type="text/javascript"></script>
    <!--everything else-->
+   <script src="./js/models.js" type="text/javascript"></script>
    <script src="./js/index.js" type="text/javascript"></script>
 </body>
 </html>
