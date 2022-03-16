@@ -44,6 +44,9 @@ pointLight.position.set(20, 0, 20);
 pointLight.castShadows = true;
 scene.add(pointLight);
 
+const helper = new THREE.CameraHelper(pointLight.shadow.camera);
+scene.add(helper);
+
 // ----------------------------------
 // MAIN MODELS
 // ----------------------------------
