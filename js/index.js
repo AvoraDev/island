@@ -1,8 +1,15 @@
 // ----------------------------------
 // BOILERPLATE CODE
 // ----------------------------------
+
 // set up scene
 const scene = new THREE.Scene();
+
+// set up renderer
+const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0xffffff, 1); // background (color, alpha)
+document.body.appendChild(renderer. domElement);
 
 // set up camera
 const camera = new THREE.PerspectiveCamera(
@@ -12,102 +19,242 @@ const camera = new THREE.PerspectiveCamera(
    1000 // far plane
 );
 
-// set up renderer
-const renderer = new THREE.WebGLRenderer( { antialias: true } ); //decide if you want to have antialiasing
-   renderer.setSize( window.innerWidth, window.innerHeight );
-   document.body.appendChild( renderer.domElement );
+// set up orbit controls (optional, and broken)
+// const controls = new OrbitControls(camera, renderer.domElement);
 
-// set up lighting (WIP)
-const ambientLight = new THREE.AmbientLight( 0xffffff, 0.5 );
-   scene.add( ambientLight );
+// set up texture loader
+const textureLoader = new THREE.TextureLoader();
 
-const dirLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-   dirLight.position.set( 100, -300, 400 );
-   scene.add( dirLight );
+// textures
+const testTile = textureLoader.load('./textures/testTile.jpg');
+const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
 
-// set perspective
-// const controls = new OrbitControls(camera, renderer.domElement); // causing isssues joriejiorekljrje
-// camera.up.set( 0, 0, 1 ); //set z to up
-camera.position.set( 0, 5, 10 ); // change location of the camera
-camera.lookAt( new THREE.Vector3( 0, 0, 0 ) ); // look at the center of the scene
-// controls.update();
+// ----------------------------------
+// ENVOIROMENT SETUP
+// ----------------------------------
 
+// set camera offset
+const cameraOffset = {x: 0, y: 5, z: 10}; // {x: 0, y: 2, z: 10};
+camera.position.set(cameraOffset.x, cameraOffset.y, cameraOffset.z); // change location of the camera
 
-// box thing
-const box = test();
-scene.add( box );
+// set up lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+scene.add(ambientLight);
 
-/* line
-const material2 = new THREE.LineBasicMaterial( { color: 0x0000ff } )
-const points2 = [];
-points2.push( new THREE.Vector3( 0, 0, 0 ) );
-points2.push( new THREE.Vector3( 0, 2, 0 ) );
-points2.push( new THREE.Vector3( 2, 2, 0 ) );
-const geometry2 = new THREE.BufferGeometry().setFromPoints( points2 );
-const line = new THREE.Line( geometry2, material2 );
-scene.add( line );
-*/
+const dirLight = new THREE.DirectionalLight(0xf7f7f7, 0.5);
+dirLight.position.set(20, 0, 20);
+scene.add(dirLight);
 
-// grid (to visualize z-x plane)
-const gridHelper = new THREE.GridHelper( 50, 50 ); // size, divisions
-scene.add( gridHelper );
+// set up shading (WIP)
+
+// ----------------------------------
+// MAIN MODELS
+// ----------------------------------
+
+// floor plane
+const mapWidth = 50;
+const mapHeight = 50;
+
+const plane = new THREE.Mesh(
+   new THREE.PlaneBufferGeometry(mapWidth, mapHeight),
+   new THREE.MeshStandardMaterial({
+      color: 0x00ff00,
+   })
+);
+plane.rotation.x = -(Math.PI / 2);
+scene.add(plane);
+
+// player model
+const player = new PlayerModel(1, {
+   cameraOffset: {
+      x: cameraOffset.x,
+      y: cameraOffset.y,
+      z: cameraOffset.z
+   }
+});
+scene.add(player.group);
+
+// tree models
+// const trees = [];
+// for (let i = 0; i < 10; i++) {
+//    generateTree(
+//       getRandFloat(0.5,2),
+//       {
+//          x: getRandFloat(-25,25),
+//          z: getRandFloat(-25,25)
+//       }
+//    );
+// }
+
+// ----------------------------------
+// HELPER MODELS
+// ----------------------------------
+
+// look into emissive and emissiveIntensity for lambert
+
+// debuugging
+const debug = document.querySelector('#debug');
+
+// test model
+const testModel = new TestModel(2, 0.5);
+testModel.tp(0, 2, 0);
+scene.add(testModel.group);
+
+// normal test model
+const testModel2 = new THREE.Mesh(
+   new THREE.BoxGeometry(1, 1, 1),
+   new THREE.MeshNormalMaterial()
+);
+testModel2.position.set (-4, 1, 0);
+scene.add(testModel2);
+
+// test plane (texturing)
+const testPlane = new THREE.Mesh(
+   new THREE.PlaneBufferGeometry(4,4),
+   new THREE.MeshStandardMaterial({
+      side: THREE.DoubleSide,
+      map: testTile,
+      normalMap: testTileNormal
+   })
+);
+testPlane.position.set(4, 2, 0);
+scene.add(testPlane);
+
+// grid
+const gridHelper = new THREE.GridHelper(50, 50); // size, divisions
+scene.add(gridHelper);
+
+// arrows
+const arrowHelper = new ArrowHelperModel();
+scene.add(arrowHelper.group);
 
 // ----------------------------------
 // RENDER LOOP
 // ----------------------------------
+
 let running = true;
 function render() {
+   // render loop
 	requestAnimationFrame(render);
-	
-	// rotate cube
-   // cube.rotation.y += 0.01;
-   
-   //rotate camera(i give up)
-   // camera.position.z += Math.sin(camera.position.z/ 360 * Math.PI);
-   // camera.position.x += Math.cos(camera.position.x/ 360 * Math.PI);
-   // camera.lookAt(new THREE.Vector3(0,0,0));
-   
 	renderer.render(scene, camera);
+	
+	// orbit control (comment out if orbit controls wont be in use)
+   // controls.update();
+	
+	// debugging
+	debug.innerHTML = (`
+	   x-pos: ${player.group.position.x} <br>
+	   y-pos: ${player.group.position.y} <br>
+	   z-pos: ${player.group.position.z} <br>
+	   y-rotation: ${player.group.rotation.y} <br>
+	   <br>
+	   cam-x: ${camera.position.x} <br>
+	   cam-y: ${camera.position.y} <br>
+	   cam-z: ${camera.position.z} <br>
+	   <br>
+	   cFC-x: ${player.cameraFollowCordinate.x} <br>
+	   cFC-y: ${player.cameraFollowCordinate.y} <br>
+	   cFC-z: ${player.cameraFollowCordinate.z} <br>
+	`);
+	
+	// rotate testPiece
+   testModel.spin('x', 0.01);
+   testModel.spin('y', 0.01);
+   testModel.spin('z', 0.01);
+   
+   // rotate testPlane
+   testPlane.rotation.x += 0.1;
+   
+   // update player information
+   player.update();
+   
+   // movement handler
+   Object.keys(player.movementFlag).forEach((key) => {
+      if (player.movementFlag[key]) {
+         player.movementHandler(key);
+      }
+   });
+   
+   // collision handler
+   // for (var vertexIndex = 0; vertexIndex < player.group.geometry.vertices.length; vertexIndex++)
+   // {       
+   //     var localVertex = player.geometry.vertices[vertexIndex].clone();
+   //     var globalVertex = player.matrix.multiplyVector3(localVertex);
+   //     var directionVector = globalVertex.subSelf( player.position );
+   
+   //     var ray = new THREE.Ray( player.position, directionVector.clone().normalize() );
+   //     var collisionResults = ray.intersectObjects( collidableMeshList );
+   //     if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
+   //     {
+   //        // a collision occurred... do something...
+   //        player.group.position.set (0, 100, 0);
+   //     }
+   // }
 }
 
-//begin rendering
+// begin rendering
 render();
 
-function test() {
-   const brr = new THREE.Group();
-   
-   // cube
-   const geometry = new THREE.BoxGeometry();
-   const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-   const cube = new THREE.Mesh(geometry, material);
-   brr.add( cube );
-   
-   const geometry2 = new THREE.BoxGeometry();
-   const material2 = new THREE.MeshBasicMaterial({color: 0xf0ff00});
-   const cube2 = new THREE.Mesh(geometry2, material2);
-   cube2.position.set(0,1,0);
-   brr.add( cube2 );
-   
-   const meshh = new THREE.Mesh(
-      new THREE.BoxGeometry(),
-      new THREE.MeshLambertMaterial( { color: 0xffffff } )
-   );
-   meshh.position.set( 1, 0, 0 );
-   brr.add( meshh );
-   
-   return brr;
+// ----------------------------------
+// UTILITY FUNCTIONS & EVENT LISTENERS
+// ----------------------------------
+
+// get random number
+function getRandFloat(min, max) {
+  return (Math.random() * (max - min)) + min;
 }
 
-// figure this out
+// fix camera on resize
+addEventListener('resize', () => {
+   camera.aspect = window.innerWidth / window.innerHeight;
+   renderer.setSize(window.innerWidth, window.innerHeight);
+   camera.updateProjectionMatrix();
+});
+
+// movement handlers
 addEventListener('keydown', (event) => {
-   if (event.code === 'Space') {
-      if (running)  {
-         cancelAnimationFrame(render);
-         running = false;
-      } else {
-         render();
-      }
-   } else if (event.code === 'ArrowLeft') {
-      cube.position.x += 0.01;
+   switch (event.code) {
+      case 'KeyW':
+         player.movementFlag.up = true;
+         break;
+         
+      case 'KeyS':
+         player.movementFlag.down = true;
+         break;
+         
+      case 'KeyA':
+         player.movementFlag.left = true;
+         break;
+         
+      case 'KeyD':
+         player.movementFlag.right = true;
+         break;
+         
+      case 'Space':
+         player.movementFlag.jump = true;
+         break;
+   }
+});
+addEventListener('keyup', (event) => {
+   switch (event.code) {
+      case 'KeyW':
+         player.movementFlag.up = false;
+         break;
+         
+      case 'KeyS':
+         player.movementFlag.down = false;
+         break;
+         
+      case 'KeyA':
+         player.movementFlag.left = false;
+         break;
+         
+      case 'KeyD':
+         player.movementFlag.right = false;
+         break;
+         
+      case 'Space':
+         player.movementFlag.jump = false;
+         break;
    }
 });
