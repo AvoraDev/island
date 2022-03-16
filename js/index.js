@@ -28,7 +28,7 @@ const textureLoader = new THREE.TextureLoader();
 // textures
 const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
-
+const bumpyNormal = textureLoader.load('./textures/bumpyNormal.jpg');
 // ----------------------------------
 // ENVOIROMENT SETUP
 // ----------------------------------
@@ -59,6 +59,7 @@ const plane = new THREE.Mesh(
    new THREE.PlaneBufferGeometry(mapWidth, mapHeight),
    new THREE.MeshStandardMaterial({
       color: 0x00ff00,
+      normalMap: bumpyNormal
    })
 );
 plane.rotation.x = -(Math.PI / 2);
@@ -163,7 +164,7 @@ function render() {
    testModel.spin('z', 0.01);
    
    // rotate testPlane
-   testPlane.rotation.x += 0.1;
+   testPlane.rotation.x += 0.01;
    
    // update player information
    player.update();
@@ -175,21 +176,7 @@ function render() {
       }
    });
    
-   // collision handler
-   // for (var vertexIndex = 0; vertexIndex < player.group.geometry.vertices.length; vertexIndex++)
-   // {       
-   //     var localVertex = player.geometry.vertices[vertexIndex].clone();
-   //     var globalVertex = player.matrix.multiplyVector3(localVertex);
-   //     var directionVector = globalVertex.subSelf( player.position );
-   
-   //     var ray = new THREE.Ray( player.position, directionVector.clone().normalize() );
-   //     var collisionResults = ray.intersectObjects( collidableMeshList );
-   //     if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
-   //     {
-   //        // a collision occurred... do something...
-   //        player.group.position.set (0, 100, 0);
-   //     }
-   // }
+   // collision handler (WORK ON)
 }
 
 // begin rendering
