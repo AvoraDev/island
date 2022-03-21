@@ -69,7 +69,7 @@ const mapHeight = 50;
 const plane = new THREE.Mesh(
    new THREE.PlaneBufferGeometry(mapWidth, mapHeight),
    new THREE.MeshStandardMaterial({
-      color: 0x42aa50,
+      color: 0x4aaa50,
       normalMap: bumpNormal
    })
 );
