@@ -235,93 +235,100 @@ class PlayerModel {
    }
 }
 
-class Tree {
-   constructor(size, leafColor, pos) {
-      this.group = new THREE.Group();
-      this.size = size;
-      this.color = {
-         leaves: leafColor,
-         trunk: 0x49011d
-      };
-      
-      // draw tree
-      this.drawTree();
-      
-      // enable/disable shadows
-      this.group.castShadow = true;
-      this.group.receiveShadow = true;
-
-      // move tree
-      this.group.position.set(pos.x, pos.y, pos.z);
-   }
-   drawTree() {
-      // mesh geometries
-      let leafGeo = new THREE.ConeGeometry(this.size * 0.75, this.size * 2, 10);
-      let trunkGeo = new THREE.CylinderGeometry(this.size / 4, this.size / 4, this.size, 10);
-      
-      // 'leaf' segments
-      let leaves1 = new THREE.Mesh(
-         leafGeo,
-         new THREE.MeshLambertMaterial({color: this.color.leaves})
-      );
-      leaves1.position.set(0, this.size, 0);
-      this.group.add(leaves1);
-      
-      let leaves2 = leaves1.clone();
-      leaves2.position.set(0, this.size * 1.25, 0);
-      this.group.add(leaves2);
-      
-      let leaves3 = leaves1.clone();
-      leaves3.position.set(0, this.size * 1.5, 0);
-      this.group.add(leaves3);
-      
-      // trunk
-      let trunk = new THREE.Mesh(
-         trunkGeo,
-         new THREE.MeshLambertMaterial({color: this.color.trunk})
-      );
-      trunk.position.set(0, 0, 0);
-      this.group.add(trunk);
-      
-      // move up to prevent clipping
-      this.group.position.set(0, this.size / 2, 0);
-   }
-}
-function spawnTree(size, color, pos) {
-   trees.push(
-      new Tree(
-         size,
-         color,
-         {x: pos.x, y: size / 2, z: pos.z}
-      )
-   );
+const ENVIRONMENT = {
+   // trees
+   trees: [],
+   Tree: class {
+      constructor(size, leafColor, pos) {
+         this.group = new THREE.Group();
+         this.size = size;
+         this.color = {
+            leaves: leafColor,
+            trunk: 0x49011d
+         };
+         
+         // draw tree
+         this.drawTree();
+         
+         // enable/disable shadows
+         this.group.castShadow = true;
+         this.group.receiveShadow = true;
    
-   scene.add(trees[trees.length - 1].group);
-}
-function generateForest(amount, minSize, maxSize, minPos, maxPos) {
-   for (let i = 0; i < amount; i++) {
-      // get random x and z coordinates
-      let randX = getRandFloat(minPos, maxPos);
-      let randZ = getRandFloat(minPos, maxPos);
-      
-      // get leaf color (small chance to get a red tree)
-      let leafColor = getRandFloat(0, 1) > 0.9 ? 0xd1a101 : 0x32620D;
-      
-      spawnTree(
-         // size
-         getRandFloat(minSize, maxSize),
+         // move tree
+         this.group.position.set(pos.x, pos.y, pos.z);
+      }
+      drawTree() {
+         // mesh geometries
+         let leafGeo = new THREE.ConeGeometry(this.size * 0.75, this.size * 2, 10);
+         let trunkGeo = new THREE.CylinderGeometry(this.size / 4, this.size / 4, this.size, 10);
          
-         // color 
-         leafColor,
+         // 'leaf' segments
+         let leaves1 = new THREE.Mesh(
+            leafGeo,
+            new THREE.MeshLambertMaterial({color: this.color.leaves})
+         );
+         leaves1.position.set(0, this.size, 0);
+         this.group.add(leaves1);
          
-         // position
-         {
-            x: randX,
-            z: randZ
-         }
-      );
+         let leaves2 = leaves1.clone();
+         leaves2.position.set(0, this.size * 1.25, 0);
+         this.group.add(leaves2);
+         
+         let leaves3 = leaves1.clone();
+         leaves3.position.set(0, this.size * 1.5, 0);
+         this.group.add(leaves3);
+         
+         // trunk
+         let trunk = new THREE.Mesh(
+            trunkGeo,
+            new THREE.MeshLambertMaterial({color: this.color.trunk})
+         );
+         trunk.position.set(0, 0, 0);
+         this.group.add(trunk);
+         
+         // move up to prevent clipping
+         this.group.position.set(0, this.size / 2, 0);
+      }
+   },
+   generateForest: function (amount, minSize, maxSize, minPos, maxPos) {
+      for (let i = 0; i < amount; i++) {
+         // get random size
+         let size = getRandFloat(minSize, maxSize);
+         
+         // get leaf color (small chance to get a golden tree)
+         let leafColor = getRandFloat(0, 1) > 0.9 ? 0xd1a101 : 0x32620D;
+         
+         this.trees.push(new ENVIRONMENT.Tree(
+            size,
+            leafColor,
+            {
+               x: getRandFloat(minPos, maxPos),
+               y: size / 2,
+               z: getRandFloat(minPos, maxPos)
+            }         
+         ));
+         
+         this.trees[i].group.castShadow = true;
+         this.trees[i].group.receiveShadow = true;
+         
+         scene.add(this.trees[i].group);
+      }
+   },
+   // rocks
+   Rock: class {
+      constructor(size, color, pos) {
+         this.group = new THREE.Group();
+         this.size = size;
+         this.color = color;
+         
+         this.drawRock();
+         this.group.position.set(pos.x, pos.y, pos.z);
+      }
+      drawRock() {
+         
+      }
    }
-}
+};
 
 // ----------------------------------
 // OTHER MODELS
