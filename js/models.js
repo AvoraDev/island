@@ -67,8 +67,10 @@ class PlayerModel {
       this.drawEyes();
       
       // enable/disable shadows
-      this.group.castShadow = true;
-      this.group.receiveShadow = true;
+      this.group.traverse((object) => {
+         object.castShadow = true;
+         object.receiveShadow = true;
+      });
       
       // move model to prevent clipping
       this.group.position.y = this.size / 2;
@@ -250,9 +252,11 @@ const ENVIRONMENT = {
          // draw tree
          this.drawTree();
          
-         // enable/disable shadows
-         this.group.castShadow = true;
-         this.group.receiveShadow = true;
+         // enable shadows
+         this.group.traverse((object) => {
+            object.castShadow = true;
+            object.receiveShadow = true;
+         });
    
          // move tree
          this.group.position.set(pos.x, pos.y, pos.z);
@@ -260,7 +264,7 @@ const ENVIRONMENT = {
       drawTree() {
          // mesh geometries
          let leafGeo = new THREE.ConeGeometry(this.size * 0.75, this.size * 2, 10);
-         let trunkGeo = new THREE.CylinderGeometry(this.size / 4, this.size / 4, this.size, 10);
+         let trunkGeo = new THREE.CylinderGeometry(this.size * 0.16, this.size * 0.16, this.size, 10);
          
          // 'leaf' segments
          let leaves1 = new THREE.Mesh(
@@ -308,24 +312,61 @@ const ENVIRONMENT = {
             }         
          ));
          
-         this.trees[i].group.castShadow = true;
-         this.trees[i].group.receiveShadow = true;
-         
          scene.add(this.trees[i].group);
       }
    },
    // rocks
+   rocks: [],
    Rock: class {
       constructor(size, color, pos) {
          this.group = new THREE.Group();
-         this.size = size;
+         this.size = {width: size.width, height: size.height, depth: size.depth};
          this.color = color;
          
          this.drawRock();
+         
+         // enable shadows
+         this.group.traverse((object) => {
+            object.castShadow = true;
+            object.receiveShadow = true;
+         });
+         
          this.group.position.set(pos.x, pos.y, pos.z);
       }
       drawRock() {
+         let rock = new THREE.Mesh(
+            new THREE.BoxGeometry(this.size.width, this.size.height, this.size.depth),
+            new THREE.MeshLambertMaterial({color: this.color})
+         );
+         this.group.add(rock);
+      }
+      
+   },
+   generateRockArea: function(amount, color, minSize, maxSize, minPos, maxPos) {
+      for (let i = 0; i < amount; i++) {
+         let size, rockColor;
          
+         // get random dimensions
+         size = {
+            width: getRandFloat(minSize, maxSize),
+            height: getRandFloat(minSize, maxSize),
+            depth: getRandFloat(minSize, maxSize)
+         };
+         
+         // get random color from given list
+         rockColor = color[getRandInt(0, color.length - 1)];
+         
+         this.rocks.push(new ENVIRONMENT.Rock(
+            size,
+            rockColor,
+            {
+               x: getRandFloat(minPos, maxPos),
+               y: size.height / 2,
+               z: getRandFloat(minPos, maxPos)
+            }         
+         ));
+         
+         scene.add(this.rocks[i].group);
       }
    }
 };
