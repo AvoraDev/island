@@ -32,7 +32,7 @@ testTileNormal.wrapT = THREE.RepeatWrapping;
 testTileNormal.repeat.set( 4, 4 );
 test.wrapS = THREE.RepeatWrapping;
 test.wrapT = THREE.RepeatWrapping;
-test.repeat.set( 2, 2 );
+test.repeat.set( 10, 10 );
 
 // ----------------------------------
 // ENVIRONMENT SETUP
