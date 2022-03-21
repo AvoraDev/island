@@ -23,7 +23,7 @@ const textureLoader = new THREE.TextureLoader();
 const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
 const bumpNormal = textureLoader.load('./textures/bumpNormal.jpg');
-const tile = textureLoader.load('./textures/test.jpg');
+const test = textureLoader.load('./textures/test.jpg');
 testTile.wrapS = THREE.RepeatWrapping;
 testTile.wrapT = THREE.RepeatWrapping;
 testTile.repeat.set( 4, 4 );
