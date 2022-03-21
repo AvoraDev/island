@@ -23,6 +23,12 @@ const textureLoader = new THREE.TextureLoader();
 const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
 const bumpNormal = textureLoader.load('./textures/bumpNormal.jpg');
+testTile.wrapS = THREE.RepeatWrapping;
+testTile.wrapT = THREE.RepeatWrapping;
+testTile.repeat.set( 4, 4 );
+testTileNormal.wrapS = THREE.RepeatWrapping;
+testTileNormal.wrapT = THREE.RepeatWrapping;
+testTileNormal.repeat.set( 4, 4 );
 
 // ----------------------------------
 // ENVIRONMENT SETUP
@@ -69,8 +75,9 @@ const mapHeight = 50;
 const plane = new THREE.Mesh(
    new THREE.PlaneBufferGeometry(mapWidth, mapHeight),
    new THREE.MeshStandardMaterial({
-      color: 0x4aaa50,
-      normalMap: bumpNormal
+      //  color: 0x4aaa50,
+      	map: testTile,
+	normalMap: testTileNormal
    })
 );
 plane.rotation.x = -(Math.PI / 2);
