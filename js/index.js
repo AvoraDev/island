@@ -22,6 +22,7 @@ const camera = new THREE.PerspectiveCamera(
 const textureLoader = new THREE.TextureLoader();
 const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
+const bumpNormal = textureLoader.load('./textures/bumpNormal.jpg');
 
 // ----------------------------------
 // ENVIRONMENT SETUP
@@ -67,9 +68,9 @@ const mapHeight = 50;
 
 const plane = new THREE.Mesh(
    new THREE.PlaneBufferGeometry(mapWidth, mapHeight),
-   new THREE.MeshLambertMaterial({
+   new THREE.MeshStandardMaterial({
       color: 0x42aa50,
-      normalMap: testTileNormal
+      normalMap: bumpNormal
    })
 );
 plane.rotation.x = -(Math.PI / 2);
