@@ -24,15 +24,15 @@ const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
 const bumpNormal = textureLoader.load('./textures/bumpNormal.jpg');
 const test = textureLoader.load('./textures/test.jpg');
-testTile.wrapS = THREE.RepeatWrapping;
-testTile.wrapT = THREE.RepeatWrapping;
-testTile.repeat.set( 4, 4 );
-testTileNormal.wrapS = THREE.RepeatWrapping;
-testTileNormal.wrapT = THREE.RepeatWrapping;
-testTileNormal.repeat.set( 4, 4 );
+// testTile.wrapS = THREE.RepeatWrapping;
+// testTile.wrapT = THREE.RepeatWrapping;
+// testTile.repeat.set( 4, 4 );
+// testTileNormal.wrapS = THREE.RepeatWrapping;
+// testTileNormal.wrapT = THREE.RepeatWrapping;
+// testTileNormal.repeat.set( 4, 4 );
 test.wrapS = THREE.RepeatWrapping;
 test.wrapT = THREE.RepeatWrapping;
-test.repeat.set( 50, 50 );
+test.repeat.set(100, 100);
 
 // ----------------------------------
 // ENVIRONMENT SETUP
