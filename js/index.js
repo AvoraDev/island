@@ -10,6 +10,7 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0xffffff, 0); // background (color, alpha)
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer. domElement);
 
 // set up camera
@@ -28,7 +29,7 @@ const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
 
 // ----------------------------------
-// ENVOIROMENT SETUP
+// ENVIRONMERNT SETUP
 // ----------------------------------
 
 // set camera offset
@@ -39,12 +40,12 @@ camera.position.set(cameraOffset.x, cameraOffset.y, cameraOffset.z); // change l
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
 scene.add(ambientLight);
 
-const pointLight = new THREE.PointLight(0xf7f7f7, 0.5, 100, 2);
-pointLight.position.set(20, 0, 20);
-pointLight.castShadows = true;
-scene.add(pointLight);
+const dirLight = new THREE.DirectionalLight(0xf7f7f7, 0.5, 100, 2);
+dirLight.position.set(2, 0, 2);
+dirLight.castShadows = true;
+scene.add(dirLight);
 
-const helper = new THREE.CameraHelper(pointLight.shadow.camera);
+const helper = new THREE.CameraHelper(dirLight.shadow.camera);
 scene.add(helper);
 
 // ----------------------------------
@@ -74,9 +75,8 @@ const player = new PlayerModel(0.5, {
 scene.add(player.group);
 
 // tree models
-const trees = [];
 // parameters for generateForest: amount, minSize, maxSize, minPos, maxPos
-generateForest(50, 0.5, 1.5, -25, 25);
+ENVIRONMENT.generateForest(50, 0.5, 1.5, -25, 25);
 
 /* (uncomment for debugging)
 // ----------------------------------
@@ -160,8 +160,16 @@ function render() {
 render();
 
 // ----------------------------------
-// UTILITY FUNCTIONS & EVENT LISTENERS
+// UTILITY FUNCTIONS
 // ----------------------------------
+
+// remove trees (KeyU; WIP)
+// function removeForest() {
+//    for (let i = 0; i < trees.length; i++)  {
+//       scene.remove(`t${i}`);
+//       trees.splice(i, 1);
+//    }
+// }
 
 // debug menu
 function updateDebug() {
@@ -185,6 +193,10 @@ function updateDebug() {
 function getRandFloat(min, max) {
   return (Math.random() * (max - min)) + min;
 }
+
+// ----------------------------------
+// EVENT LISTENERS
+// ----------------------------------
 
 // fix camera on resize
 addEventListener('resize', () => {
@@ -214,6 +226,10 @@ addEventListener('keydown', (event) => {
          
       case 'Space':
          player.movementFlag.jump = true;
+         break;
+         
+      case 'KeyU':
+         // removeForest();
          break;
    }
 });
