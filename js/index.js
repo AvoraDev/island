@@ -6,11 +6,8 @@
 const scene = new THREE.Scene();
 
 // set up renderer
-const renderer = new THREE.WebGLRenderer({antialias: true});
+const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0xffffff, 0); // background (color, alpha)
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer. domElement);
 
 // set up camera
@@ -21,15 +18,13 @@ const camera = new THREE.PerspectiveCamera(
    100 // far plane
 );
 
-// set up texture loader
+// load textures
 const textureLoader = new THREE.TextureLoader();
-
-// textures
 const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
 
 // ----------------------------------
-// ENVIRONMERNT SETUP
+// ENVIRONMENT SETUP
 // ----------------------------------
 
 // set camera offset
@@ -40,12 +35,26 @@ camera.position.set(cameraOffset.x, cameraOffset.y, cameraOffset.z); // change l
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
 scene.add(ambientLight);
 
-const dirLight = new THREE.DirectionalLight(0xf7f7f7, 0.5, 100, 2);
-dirLight.position.set(2, 0, 2);
-dirLight.castShadows = true;
-scene.add(dirLight);
+const directionalLight = new THREE.DirectionalLight(0xf7f7f7, 0.5);
+directionalLight.position.set(150, 150, 150);
+directionalLight.castShadow = true;
+scene.add(directionalLight);
 
-const helper = new THREE.CameraHelper(dirLight.shadow.camera);
+// set up shadows (make sure to enable shadows for all meshes)
+const shadowCamArea = 25;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+directionalLight.shadow.camera.left = -shadowCamArea;
+directionalLight.shadow.camera.right = shadowCamArea;
+directionalLight.shadow.camera.top = shadowCamArea;
+directionalLight.shadow.camera.bottom = -shadowCamArea;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 400;
+
+// default is 512 x 512; the larger the size, the more expensive it is to process
+directionalLight.shadow.mapSize = new THREE.Vector2(1500, 1500);
+
+const helper = new THREE.CameraHelper(directionalLight.shadow.camera);
 scene.add(helper);
 
 // ----------------------------------
@@ -53,15 +62,18 @@ scene.add(helper);
 // ----------------------------------
 
 // floor plane
-const mapWidth = 80;
-const mapHeight = 80;
+const mapWidth = 50;
+const mapHeight = 50;
 
 const plane = new THREE.Mesh(
    new THREE.PlaneBufferGeometry(mapWidth, mapHeight),
-   new THREE.MeshStandardMaterial({color: 0x00ff00})
+   new THREE.MeshLambertMaterial({
+      color: 0x42aa50,
+      normalMap: testTileNormal
+   })
 );
 plane.rotation.x = -(Math.PI / 2);
-plane.recieveShadow = true;
+plane.receiveShadow = true;
 scene.add(plane);
 
 // player model
@@ -77,6 +89,14 @@ scene.add(player.group);
 // tree models
 // parameters for generateForest: amount, minSize, maxSize, minPos, maxPos
 ENVIRONMENT.generateForest(50, 0.5, 1.5, -25, 25);
+
+// rock models
+ENVIRONMENT.generateRockArea(
+   100, // amount
+   [0xaaaaaa, 0xcccccc, 0xAAAAAA], // colors
+   0.05, 0.25, // minimum and maximum size
+   -25, 25 // minimum and maximum position
+);
 
 /* (uncomment for debugging)
 // ----------------------------------
@@ -146,6 +166,11 @@ function render() {
    // update player information
    player.update();
    
+   // test
+   const time = Date.now() * 0.0001;
+   directionalLight.position.x = Math.sin(time) * 200;
+   directionalLight.position.z = Math.cos(time) * 200;
+   
    // movement handler
    Object.keys(player.movementFlag).forEach((key) => {
       if (player.movementFlag[key]) {
@@ -162,14 +187,6 @@ render();
 // ----------------------------------
 // UTILITY FUNCTIONS
 // ----------------------------------
-
-// remove trees (KeyU; WIP)
-// function removeForest() {
-//    for (let i = 0; i < trees.length; i++)  {
-//       scene.remove(`t${i}`);
-//       trees.splice(i, 1);
-//    }
-// }
 
 // debug menu
 function updateDebug() {
@@ -189,9 +206,14 @@ function updateDebug() {
 	`);
 }
 
-// get random number
+// get random float
 function getRandFloat(min, max) {
   return (Math.random() * (max - min)) + min;
+}
+
+// get random interger
+function getRandInt(min, max) {
+  return Math.floor((Math.random() * (max - min)) + min);
 }
 
 // ----------------------------------
@@ -226,10 +248,6 @@ addEventListener('keydown', (event) => {
          
       case 'Space':
          player.movementFlag.jump = true;
-         break;
-         
-      case 'KeyU':
-         // removeForest();
          break;
    }
 });
