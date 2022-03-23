@@ -23,7 +23,7 @@ const textureLoader = new THREE.TextureLoader();
 const testTile = textureLoader.load('./textures/testTile.jpg');
 const testTileNormal = textureLoader.load('./textures/testTileNormal.jpg');
 const bumpNormal = textureLoader.load('./textures/bumpNormal.jpg');
-const test = textureLoader.load('./textures/test.jpg');
+const test = textureLoader.load('./textures/test.png');
 // testTile.wrapS = THREE.RepeatWrapping;
 // testTile.wrapT = THREE.RepeatWrapping;
 // testTile.repeat.set( 4, 4 );
@@ -32,7 +32,7 @@ const test = textureLoader.load('./textures/test.jpg');
 // testTileNormal.repeat.set( 4, 4 );
 test.wrapS = THREE.RepeatWrapping;
 test.wrapT = THREE.RepeatWrapping;
-test.repeat.set(100, 100);
+test.repeat.set(2, 2);
 
 // ----------------------------------
 // ENVIRONMENT SETUP
