@@ -251,9 +251,6 @@ function render() {
    player.update();
 }
 
-// begin rendering
-init();
-
 // ----------------------------------
 // UTILITY FUNCTIONS
 // ----------------------------------
