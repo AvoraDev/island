@@ -104,8 +104,8 @@ const ground = new THREE.Mesh(
    // new THREE.PlaneBufferGeometry(groundWidth, groundHeight),
    new THREE.CircleGeometry(groundArea, 100),
    new THREE.MeshLambertMaterial({
-      map: grass // grass texture for ground
-      // color: 0x42aa50
+      // map: grass // grass texture for ground
+      color: 0x42aa50
    })
 );
 ground.rotation.x = -(Math.PI / 2);
