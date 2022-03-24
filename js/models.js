@@ -3,20 +3,21 @@
 // ----------------------------------
 
 class PlayerModel {
-   constructor(size, cameraInfo) {
+   constructor(size, color, cameraInfo) {
+      // TODO - try to minimize the amount of objects
       // model info
       this.group = new THREE.Group();
       this.size = size;
       this.color = {
-         body: 0x0eeff,
-         eyes: 0x000000
+         body: color.body, // original: 0x0eeff
+         eyes: color.eyes
       };
       
       // camera offset
       this.cameraOffset = {
-         x: cameraInfo.cameraOffset.x,
-         y: cameraInfo.cameraOffset.y,
-         z: cameraInfo.cameraOffset.z
+         x: cameraInfo.x,
+         y: cameraInfo.y,
+         z: cameraInfo.z
       };
       
       // tween durations
@@ -25,12 +26,17 @@ class PlayerModel {
          position: 1,
          follow: {
             x: 0.5,
-            y: 0.5,
+            y: 1,
             z: 0.5
          }
       };
       
+      // camera fall switch
+      // used with this.cameraFall()
+      this.cameraFallSwitch = false;
+      
       // player speeds
+      // TODO - implement this.jumpHeight
       this.movementSpeed = 0.05;
       this.jumpSpeed = 0.06;
       this.jumpHeight = this.size * 2;
@@ -54,26 +60,27 @@ class PlayerModel {
          up: 1.570796,     // parseFloat((Math.PI / 2).toFixed(6)),
          down: 4.712388,   // parseFloat(((Math.PI * 3) / 2).toFixed(6)),
          left: 3.14159,    // parseFloat((Math.PI).toFixed(6)),
-         right: 6.283185   // parseFloat((Math.PI * 2).toFixed(6))***
+         right: 6.283185   // parseFloat((Math.PI * 2).toFixed(6))*
       };
-      // *** right starts off at 0
+      // * right starts off at 0
       
       // rotation helpers (allow for proper full circle movement)
+      // TODO - look into this.tweenBuffer and this.errorSpace
       this.tweenBuffer = true;
-      this.errorSpace = 0.05; // allowed error for full circle (see rotateHandler()) original: 0.000005
+      // allowed error for full circle (see this.rotateHandler())
+      this.errorSpace = 0.05; // original: 0.000005
       
       // draw model
       this.drawBody();
       this.drawEyes();
+      this.group.position.y = this.size / 2;
+      this.group.rotation.y = this.cardinalDir.down;
       
-      // enable/disable shadows
+      // enable shadows
       this.group.traverse((object) => {
          object.castShadow = true;
          object.receiveShadow = true;
       });
-      
-      // move model to prevent clipping
-      this.group.position.y = this.size / 2;
       
       // camera lookAt coordinates
       this.cameraFollowCordinate = {
@@ -87,12 +94,15 @@ class PlayerModel {
          new THREE.BoxGeometry(this.size, this.size, this.size),
          new THREE.MeshLambertMaterial({color: this.color.body})
       );
-      body.position.set(0, 0, 0);
       this.group.add(body);
    }
    drawEyes() {
       // eye geometries
-      let eyeGeo = new THREE.BoxGeometry(this.size / 8, this.size / 2, this.size / 4);
+      let eyeGeo = new THREE.BoxGeometry(
+         this.size / 8,
+         this.size / 2,
+         this.size / 4
+      );
       
       // left eye
       let leftEye = new THREE.Mesh(
@@ -108,9 +118,19 @@ class PlayerModel {
       this.group.add(rightEye);
    }
    update() {
+      // camera fall handler
+      if (player.cameraFallSwitch === true) {this.cameraFallLoop(); return;}
+      
       // turning handler
       this.rotation = this.group.rotation.y; // for convenience
       this.rotateHandler();
+      
+      // movement handler
+      Object.keys(this.movementFlag).forEach((key) => {
+         if (this.movementFlag[key]) {
+            this.movementHandler(key);
+         }
+      });      
       
       // jumping handler
       this.jumpHandler();
@@ -129,8 +149,9 @@ class PlayerModel {
             break;
             
          case 'down':
-            let downRadian = this.rotation >= this.cardinalDir.up ? this.cardinalDir.down : -1.570796;
-            downRadian = this.rotateHandler(downRadian);
+            let downRadian = this.rotation >= this.cardinalDir.up ? 
+               this.cardinalDir.down : -1.570796;
+               downRadian = this.rotateHandler(downRadian);
             
             this.group.position.z += this.movementSpeed;
             if (this.tweenBuffer === true) {
@@ -152,8 +173,9 @@ class PlayerModel {
             break;
             
          case 'right':
-            let rightRadian = this.rotation <= this.cardinalDir.left ? 0 : this.cardinalDir.right;
-            rightRadian = this.rotateHandler(rightRadian);
+            let rightRadian = this.rotation <= this.cardinalDir.left ?
+               0 : this.cardinalDir.right;
+               rightRadian = this.rotateHandler(rightRadian);
             
             this.group.position.x += this.movementSpeed;
             if (this.tweenBuffer === true) {
@@ -172,11 +194,14 @@ class PlayerModel {
       }
    }
    rotateHandler(input) {
-      // it isn't perfect, but i think this is good enough for me
-      // checks to see if current rotation is equal to one of
-      // the secondary cardinalDir of either down or right
-      // if it is, then reset to original cardinal direction
-      // (errorSpace is the allowed error when returning to original cardinal direction)
+      /*
+      TODO - try to figure out how to fix all of this
+      checks to see if current rotation is equal to one of
+      the secondary cardinalDir of either down or right
+      if it is, then reset to original cardinal direction
+      this.errorSpace is the allowed error when
+      returning to original cardinal direction
+      */
       if (this.rotation >= this.cardinalDir.right - this.errorSpace) { 
          this.group.rotation.y = 0;
          this.tweenBuffer = false;
@@ -193,7 +218,7 @@ class PlayerModel {
    }
    jumpHandler() {
       if (this.jumpEnabled === true) {
-         if (this.group.position.y >= this.size / 2) { // if the player isn't touching the floor
+         if (this.group.position.y >= this.size / 2) {
             this.vPos += this.jumpSpeed;
             this.group.position.y = Math.sin(this.vPos) + (this.size / 2);
          } else { // reset jump
@@ -203,22 +228,25 @@ class PlayerModel {
          }
       }
    }
-   resetCamera() { // bless the heavens for gsap
+   resetCamera() {
+      // (bless the heavens for gsap)
       // tween cameras position to follow player
       gsap.to(camera.position, {
          x: this.group.position.x + this.cameraOffset.x,
          y: this.group.position.y + this.cameraOffset.y,
          z: this.group.position.z + this.cameraOffset.z,
-         duration: this.cameraTweenDuration.position // this.cameraTD
+         duration: this.cameraTweenDuration.position
       });
       
+      this.resetCameraLootAt();
+   }
+   resetCameraLootAt() {
       // tween camera's lookAt coordinates
-      // 'key' will be either x, y, or z
-      Object.keys(this.cameraTweenDuration.follow).forEach((key) => {
-         if (this.cameraTweenDuration.follow[key] !== 0) {
+      Object.keys(this.cameraTweenDuration.follow).forEach((axis) => {
+         if (this.cameraTweenDuration.follow[axis] !== 0) {
             gsap.to(this.cameraFollowCordinate, {
-               [key]: this.group.position[key],
-               duration: this.cameraTweenDuration.follow[key]
+               [axis]: this.group.position[axis],
+               duration: this.cameraTweenDuration.follow[axis]
             });
          } else {
             this.cameraFollowCordinate[key] = this.group.position[key];
@@ -226,6 +254,44 @@ class PlayerModel {
       });
       
       // update camera's lookAt coordinates
+      camera.lookAt(
+         this.cameraFollowCordinate.x,
+         this.cameraFollowCordinate.y,
+         this.cameraFollowCordinate.z
+      );
+   }
+   cameraFall(start, dur) {
+      // starts the camera from a given height and smoothly lowers the camera,
+      // giving a 'falling' look
+      
+      // disable player movement
+      this.cameraFallSwitch = true;
+      camera.position.y = start;
+      
+      // fall
+      gsap.to(camera.position, {
+         y: this.group.position.y + this.cameraOffset.y,
+         duration: dur
+      });
+      
+      // slow down camera lookAt
+      let pastTween = this.cameraTweenDuration.follow.y;
+      this.cameraTweenDuration.follow.y = dur * 1.25;
+      setTimeout(() => {
+         gsap.to(this.cameraTweenDuration.follow, {
+            y: pastTween
+         });
+      }, (dur * 1000) + 4000);
+      
+      // enable player.update() after fall
+      setTimeout(() => {
+         this.cameraFallSwitch = false;
+      }, (dur * 1000) - 200);
+   }
+   cameraFallLoop() {
+      // tweens the camera's lookAt coordinates while
+      // this.cameraFallSwitch is true
+      this.cameraFollowCordinate.y = camera.position.y;
       camera.lookAt(
          this.cameraFollowCordinate.x,
          this.cameraFollowCordinate.y,
@@ -251,20 +317,26 @@ const ENVIRONMENT = {
          
          // draw tree
          this.drawTree();
+         this.group.position.set(pos.x, this.size / 2, pos.z);
          
          // enable shadows
          this.group.traverse((object) => {
             object.castShadow = true;
             object.receiveShadow = true;
          });
-   
-         // move tree
-         this.group.position.set(pos.x, pos.y, pos.z);
       }
       drawTree() {
          // mesh geometries
-         let leafGeo = new THREE.ConeGeometry(this.size * 0.75, this.size * 2, 10);
-         let trunkGeo = new THREE.CylinderGeometry(this.size * 0.16, this.size * 0.16, this.size, 10);
+         let leafGeo = new THREE.ConeGeometry(
+            this.size * 0.75,
+            this.size * 2,
+            10
+         );
+         let trunkGeo = new THREE.CylinderGeometry(
+            this.size * 0.16,
+            this.size * 0.16,
+            this.size, 10
+         );
          
          // 'leaf' segments
          let leaves1 = new THREE.Mesh(
@@ -282,36 +354,42 @@ const ENVIRONMENT = {
          leaves3.position.set(0, this.size * 1.5, 0);
          this.group.add(leaves3);
          
-         // trunk
+         // tree trunk
          let trunk = new THREE.Mesh(
             trunkGeo,
             new THREE.MeshLambertMaterial({color: this.color.trunk})
          );
          trunk.position.set(0, 0, 0);
          this.group.add(trunk);
-         
-         // move up to prevent clipping
-         this.group.position.set(0, this.size / 2, 0);
       }
    },
    generateForest: function (amount, minSize, maxSize, minPos, maxPos) {
+      let size, leafColor;
       for (let i = 0; i < amount; i++) {
          // get random size
-         let size = getRandFloat(minSize, maxSize);
+         size = getRandFloat(minSize, maxSize);
          
-         // get leaf color (small chance to get a golden tree)
-         let leafColor = getRandFloat(0, 1) > 0.9 ? 0xd1a101 : 0x32620D;
+         // get one of three leaf colors: red, golden, and green
+         leafColor = getRandFloat(0, 1); // > 0.75 ? 0xd1a101 : 0x32520D;
+         if (leafColor >= 0.98) {
+            leafColor = 0xb00a00; // red, rare ~1/10
+         } else if (leafColor >= 0.6) {
+            leafColor = 0xd1a101; // golden, uncommon ~3/10
+         } else {
+            leafColor = 0x32520D; // green, common ~6/10
+         }
          
+         // add to trees array
          this.trees.push(new ENVIRONMENT.Tree(
             size,
             leafColor,
             {
                x: getRandFloat(minPos, maxPos),
-               y: size / 2,
                z: getRandFloat(minPos, maxPos)
             }         
          ));
          
+         // add to scene
          scene.add(this.trees[i].group);
       }
    },
@@ -320,32 +398,69 @@ const ENVIRONMENT = {
    Rock: class {
       constructor(size, color, pos) {
          this.group = new THREE.Group();
-         this.size = {width: size.width, height: size.height, depth: size.depth};
+         this.size = {
+            width: size.width,
+            height: size.height,
+            depth: size.depth
+         };
          this.color = color;
          
+         // draw rock
          this.drawRock();
+         this.group.position.set(pos.x, pos.y, pos.z);
          
          // enable shadows
          this.group.traverse((object) => {
             object.castShadow = true;
             object.receiveShadow = true;
          });
-         
-         this.group.position.set(pos.x, pos.y, pos.z);
       }
       drawRock() {
-         let rock = new THREE.Mesh(
-            new THREE.BoxGeometry(this.size.width, this.size.height, this.size.depth),
+         let mainRock = new THREE.Mesh(
+            new THREE.BoxGeometry(
+               this.size.width,
+               this.size.height,
+               this.size.depth
+            ),
             new THREE.MeshLambertMaterial({color: this.color})
          );
-         this.group.add(rock);
+         this.group.add(mainRock);
+         
+         let sideRock1 = new THREE.Mesh(
+            new THREE.BoxGeometry(
+               this.size.width / 2,
+               this.size.height / 2,
+               this.size.depth / 2
+            ),
+            new THREE.MeshLambertMaterial({color: this.color})
+         );
+         sideRock1.position.set(
+            (this.size.width * 0.5) * getRandInt(-1, 2),
+            (this.size.height / 3) / -2,
+            (this.size.depth * 0.5) * getRandInt(-1, 2)
+         );
+         this.group.add(sideRock1);
+         
+         let sideRock2 = new THREE.Mesh(
+            new THREE.BoxGeometry(
+               this.size.width / 3,
+               this.size.height / 3,
+               this.size.depth / 3
+            ),
+            new THREE.MeshLambertMaterial({color: this.color})
+         );
+         sideRock2.position.set(
+            this.size.width * -0.75,
+            (this.size.height / 3) / -2,
+            this.size.depth * -0.75
+         );
+         this.group.add(sideRock2);
       }
       
    },
    generateRockArea: function(amount, color, minSize, maxSize, minPos, maxPos) {
+      let size, rockColor;
       for (let i = 0; i < amount; i++) {
-         let size, rockColor;
-         
          // get random dimensions
          size = {
             width: getRandFloat(minSize, maxSize),
@@ -354,8 +469,9 @@ const ENVIRONMENT = {
          };
          
          // get random color from given list
-         rockColor = color[getRandInt(0, color.length - 1)];
+         rockColor = color[getRandInt(0, color.length)];
          
+         // add to array
          this.rocks.push(new ENVIRONMENT.Rock(
             size,
             rockColor,
@@ -366,6 +482,7 @@ const ENVIRONMENT = {
             }         
          ));
          
+         // add to scene
          scene.add(this.rocks[i].group);
       }
    }
@@ -376,7 +493,7 @@ const ENVIRONMENT = {
 // ----------------------------------
 
 // test models
-// presets: normal-map cube (1), l-piece(2)
+// presets: normal-map cube (1), l-piece(2), plane(3)
 class TestModel {
    constructor(preset, size, material) {
       this.group = new THREE.Group();
@@ -387,9 +504,11 @@ class TestModel {
       // draw selected preset model;
       this.selectPreset(this.preset);
       
-      // enable/disable shadows
-      this.group.castShadow = true;
-      this.group.receiveShadow = true;
+      // enable shadows
+      this.group.traverse((object) => {
+         object.castShadow = true;
+         object.receiveShadow = true;
+      });
    }
    selectPreset(preset) {
       switch (preset) {
@@ -463,6 +582,7 @@ class TestModel {
    }
 }
 
+// arrow helper for axis
 class ArrowHelperModel {
    constructor(size = 10) {
       this.group = new THREE.Group();
