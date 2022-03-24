@@ -166,12 +166,6 @@ const player = new PlayerModel(0.5,
 );
 scene.add(player.group);
 
-// camera fall
-// TODO - add a start menu and opener with
-// three.js and GSAP logos
-player.cameraFall(50, 5);
-
-
 // ----------------------------------
 // HELPER MODELS
 // ----------------------------------
@@ -224,6 +218,11 @@ scene.add(testModel3.group);
 let debugMenu = false;
 let running = false;
 function init() {
+   // camera fall
+   // TODO - add a start menu and opener with
+   // three.js and GSAP logos
+   player.cameraFall(50, 5);
+   
    running = true;
    render();
 }
