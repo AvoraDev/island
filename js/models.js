@@ -125,27 +125,35 @@ class PlayerModel {
       this.rotation = this.group.rotation.y; // for convenience
       this.rotateHandler();
       
-      // movement handler
-      Object.keys(this.movementFlag).forEach((key) => {
-         if (this.movementFlag[key]) {
-            this.movementHandler(key);
-         }
-      });      
-      
       // jumping handler
       this.jumpHandler();
       
       // reset camera position
       this.resetCamera();
+      
+      // movement handler
+      if (this.movementFlag.up)     {this.movementHandler('up');}
+      if (this.movementFlag.down)   {this.movementHandler('down');}
+      if (this.movementFlag.left)   {this.movementHandler('left');}
+      if (this.movementFlag.right)  {this.movementHandler('right');}
+      /* old handler
+      Object.keys(this.movementFlag).forEach((key) => {
+         if (this.movementFlag[key]) {
+            this.movementHandler(key);
+         }
+      });
+      */
    }   
    movementHandler(dir) {
       switch (dir) {
          case 'up':
             this.group.position.z -= this.movementSpeed;
-            gsap.to(this.group.rotation, {
-               y: this.cardinalDir.up,
-               duration: this.rotateTweenDuration
-            });
+            if (this.roration !== this.cardinalDir.up) {
+               gsap.to(this.group.rotation, {
+                  y: this.cardinalDir.up,
+                  duration: this.rotateTweenDuration
+               });
+            }
             break;
             
          case 'down':
@@ -166,10 +174,12 @@ class PlayerModel {
             
          case 'left':
             this.group.position.x -= this.movementSpeed;
-            gsap.to(this.group.rotation, {
-               y: this.cardinalDir.left,
-               duration: this.rotateTweenDuration
-            });
+            if (this.roration !== this.cardinalDir.left) {
+               gsap.to(this.group.rotation, {
+                  y: this.cardinalDir.left,
+                  duration: this.rotateTweenDuration
+               });
+            }
             break;
             
          case 'right':
@@ -260,33 +270,36 @@ class PlayerModel {
          this.cameraFollowCordinate.z
       );
    }
-   cameraFall(start, dur) {
+   cameraFall(start, dur, delay = 0) {
       // starts the camera from a given height and smoothly lowers the camera,
       // giving a 'falling' look
+      // duration and delay are in seconds
       
       // disable player movement
       this.cameraFallSwitch = true;
       camera.position.y = start;
       
-      // fall
-      gsap.to(camera.position, {
-         y: this.group.position.y + this.cameraOffset.y,
-         duration: dur
-      });
-      
-      // slow down camera lookAt
-      let pastTween = this.cameraTweenDuration.follow.y;
-      this.cameraTweenDuration.follow.y = dur * 1.25;
       setTimeout(() => {
-         gsap.to(this.cameraTweenDuration.follow, {
-            y: pastTween
+         // fall
+         gsap.to(camera.position, {
+            y: this.group.position.y + this.cameraOffset.y,
+            duration: dur
          });
-      }, (dur * 1000) + 4000);
-      
-      // enable player.update() after fall
-      setTimeout(() => {
-         this.cameraFallSwitch = false;
-      }, (dur * 1000) - 200);
+         
+         // slow down camera lookAt
+         let pastTween = this.cameraTweenDuration.follow.y;
+         this.cameraTweenDuration.follow.y = dur * 1.25;
+         setTimeout(() => {
+            gsap.to(this.cameraTweenDuration.follow, {
+               y: pastTween
+            });
+         }, (dur * 1000) + 4000);
+         
+         // enable player.update() after fall
+         setTimeout(() => {
+            this.cameraFallSwitch = false;
+         }, (dur * 1000) - 200);
+      }, delay * 1000);
    }
    cameraFallLoop() {
       // tweens the camera's lookAt coordinates while
@@ -330,12 +343,12 @@ const ENVIRONMENT = {
          let leafGeo = new THREE.ConeGeometry(
             this.size * 0.75,
             this.size * 2,
-            10
+            5
          );
          let trunkGeo = new THREE.CylinderGeometry(
             this.size * 0.16,
             this.size * 0.16,
-            this.size, 10
+            this.size, 5
          );
          
          // 'leaf' segments
@@ -350,9 +363,9 @@ const ENVIRONMENT = {
          leaves2.position.set(0, this.size * 1.25, 0);
          this.group.add(leaves2);
          
-         let leaves3 = leaves1.clone();
-         leaves3.position.set(0, this.size * 1.5, 0);
-         this.group.add(leaves3);
+         // let leaves3 = leaves1.clone();
+         // leaves3.position.set(0, this.size * 1.5, 0);
+         // this.group.add(leaves3);
          
          // tree trunk
          let trunk = new THREE.Mesh(
