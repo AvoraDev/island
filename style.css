@@ -1,0 +1,95 @@
+/*background*/
+body {
+   font-family:  Verdana, sans-serif;
+   margin: 0;
+   background-color: rgb(150, 220, 255);
+   background-image: linear-gradient(rgb(150, 200, 255), rgb(255, 255, 255));
+}
+
+/*specific elements*/
+#debugMenu {
+   position: fixed; 
+   width: 300px; 
+   height: 100%; 
+   overflow: auto;
+   padding: 10px 20px;
+}
+#blankScreen {
+   position: fixed;
+   width: 100%;
+   height: 100%;
+   background-color: white;
+}
+#intro {
+   position: fixed;
+   display: flex;
+   width: 100%;
+   height: 100%;
+}
+#introTitle {
+   text-align: center;
+   padding-bottom: 10px;
+}
+
+/*table shorthand*/
+.table {
+   display: table;
+   width: 100%;
+}
+.t-row {
+   display: table-row;
+}
+.t-cell {
+   display: table-cell;
+   text-align: center;
+}
+
+.rounded {
+   /*border: 4px solid black;*/
+   border-radius: 50%;
+}
+
+/*lines & shapes*/
+.vertical-line {  /*use with div and set its height with <style>*/
+   border-left: 4px solid black;
+   height: 100%;
+   margin: 0 40px;
+}
+.bg-square {
+   border-radius: 15%;
+   padding: 20px;
+   background-color: rgb(50, 50, 50);
+   background-color: rgba(50, 50, 50, 0.5);
+}
+
+/*other classes*/
+.flex-center {
+   justify-content: center;
+   align-items: center;
+}
+/*
+fade-in-out {
+   animation: fade-in-out 3s;
+   animation-fill-mode: both;
+}
+fade-out {
+   animation: fade-out 1s;
+   animation-fill-mode: both;
+}
+*/
+
+/*animations*/
+@keyframes fade-in {
+   0%    {opacity: 0;}
+   100%  {opacity: 1;}
+}
+@keyframes fade-out {
+   0%    {opacity: 1;}
+   100%  {opacity: 0;}
+}
+@keyframes fade-in-out {
+   0%    {opacity: 0; display: none;}
+   20%   {opacity: 1;}
+   90%   {opacity: 1;}
+   100%  {opacity: 0; display: none;}
+}
