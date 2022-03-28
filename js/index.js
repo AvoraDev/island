@@ -51,7 +51,7 @@ the larger the camera area or map resolution,
 the more expensive it is to process
 */
 const shadowCamArea = 25;
-const shadowCamRes = 1500;
+const shadowCamRes = 1350;
    renderer.shadowMap.enabled = true;
    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
    directionalLight.shadow.camera.left = -shadowCamArea;
@@ -101,7 +101,7 @@ const bumpNormal = textureLoader.load('./textures/bumpNormal.jpg');
 // ground
 const groundArea = 30;
 const ground = new THREE.Mesh(
-   // new THREE.PlaneBufferGeometry(groundWidth, groundHeight),
+   // new THREE.PlaneBufferGeometry(50, 50),
    new THREE.CircleGeometry(groundArea, 100),
    new THREE.MeshLambertMaterial({
       // map: grass // grass texture for ground
@@ -137,7 +137,7 @@ scene.add(sun);
 // trees
 // TODO - make the spawning area look less square
 ENVIRONMENT.generateForest(
-   100, // amount
+   60, // amount
    0.5, 1.5, // minimum and maximum size
    -20, 20 // minimum and maximum position
 );
@@ -145,7 +145,7 @@ ENVIRONMENT.generateForest(
 // rocks
 // TODO - make the spawning area look less square
 ENVIRONMENT.generateRockArea(
-   150, // amount
+   60, // amount
    [0x555555, 0xaaaaaa, 0xcccccc, 0xAAAAAA], // possible colors
    0.05, 0.2, // minimum and maximum size
    -20, 20 // minimum and maximum position
@@ -215,13 +215,19 @@ scene.add(testModel3.group);
 // RENDER SCENE
 // ----------------------------------
 
-let debugMenu = false;
+let debug = false;
 let running = false;
+const cFall = {
+   enabled: true,
+   height: 100,
+   duration: 5,
+   delay: 0
+};
 function init() {
    // camera fall
    // TODO - add a start menu and opener with
    // three.js and GSAP logos
-   player.cameraFall(50, 5);
+   if (cFall.enabled === true) {player.cameraFall(cFall.height, cFall.duration, cFall.delay);}
    
    running = true;
    render();
@@ -256,8 +262,10 @@ function render() {
 // ----------------------------------
 
 // debug menu
+let debugTxtbox = document.querySelector('#debugTxtbox');
+let debugMenu = document.querySelector('#debugMenu');
 function updateDebug() {
-   if (debugMenu === true) {
+   if (debug === true) {
       /* loop version, costly
       let t = ``;
       
@@ -271,7 +279,7 @@ function updateDebug() {
       });
       */
       
-      debug.innerHTML = // t;
+      debugTxtbox.innerHTML = // t;
       (`
          HELPERS: <br>
          grid: ',' <br>
@@ -329,11 +337,12 @@ function updateDebug() {
 }
 
 function debugToggle() {
-   if (debugMenu) {
-      debugDiv.style.background = 'rgba(150, 150, 150, 0.8)';
+   if (debug === true) {
+      debugMenu.style.background = 'rgb(150, 150, 150)'; // fallback
+      debugMenu.style.background = 'rgba(150, 150, 150, 0.8)';
    } else {
-      debugDiv.style.background = 'none';
-      debug.innerHTML = '';
+      debugMenu.style.background = 'none';
+      debugTxtbox.innerHTML = '';
    }
 }
 
@@ -405,7 +414,7 @@ addEventListener('keydown', (event) => {
          break;
          
       case 'ControlRight':
-         debugMenu = !debugMenu;
+         debug = !debug;
          debugToggle();
          break;
          
