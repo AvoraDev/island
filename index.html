@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
    <meta charset="UTF-8">
-   <!--TODO - add favicon (something related to the player or trees)-->
+   <!--TODO - add favicon (something related to the player)-->
    <title>Island | Tech Demo</title>
    <link href="./style.css" rel="stylesheet">
    <style>
@@ -33,10 +33,11 @@
          animation-delay: 2s;
       }
    </style>
+   <!--
    <script>
       // startTime is when the icon animation ends
-      let startTime = 5.5;
-      function animationReset(id, change) {
+      // let startTime = 5.5;
+      function animationReset(id, startTime, change) {
       let elem = document.querySelector(`#${id}`);
          setTimeout(() => {
             elem.innerHTML = '';
@@ -49,8 +50,9 @@
          }, (startTime * 1000) + 10);
       }
    </script>
+   -->
 </head>
-<body onload="cFall.delay = 5; init()">
+<body onload="animationReset('introTitle', 5, 'Created by AvoRaDev'); cFall.delay = 5; init()">
    <!--debug textbox-->
    <div id="debugMenu"><p id="debugTxtbox"></p></div>
    
@@ -59,14 +61,12 @@
    
    <!--intro-->
    <div id="intro" class="flex-center">
-      <div> 
+      <div>
          <div>
             
             <div>
                <h4 id="introTitle" class="intro-animation"> Made With </h4>
-               <script>
-                  animationReset('introTitle', 'Made by AvoRaDev')
-               </script>
+               <!--<script> animationReset('introTitle', 5.5, 'Made by AvoRaDev') </script>-->
             </div>
             
          </div>
