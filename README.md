@@ -1,9 +1,7 @@
 # Island | Tech Demo
 - A project made to learn about 3D game deveopment.
-
-<br>
-
-# Libraries
+___
+## **Libraries**
 - Three.js
 - GSAP
 
