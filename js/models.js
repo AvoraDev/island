@@ -136,6 +136,7 @@ class PlayerModel {
       if (this.movementFlag.down)   {this.movementHandler('down');}
       if (this.movementFlag.left)   {this.movementHandler('left');}
       if (this.movementFlag.right)  {this.movementHandler('right');}
+      if (this.movementFlag.jump)   {this.movementHandler('jump');}
       /* old handler
       Object.keys(this.movementFlag).forEach((key) => {
          if (this.movementFlag[key]) {
