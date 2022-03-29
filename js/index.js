@@ -346,6 +346,20 @@ function debugToggle() {
    }
 }
 
+// for intro animation
+function animationReset(id, startTime, change) {
+   let elem = document.querySelector(`#${id}`);
+   setTimeout(() => {
+      elem.innerHTML = '';
+      elem.style.animation = 'none';
+   }, startTime * 1000);
+   
+   setTimeout(() => {
+      elem.innerHTML= change;
+      elem.style.animation = '';
+   }, (startTime * 1000) + 20);
+}
+
 // get random float
 function getRandFloat(min, max, dec = 16) {
    if (dec <= 0 || dec > 16) {
