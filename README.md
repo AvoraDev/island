@@ -2,8 +2,8 @@
 - A project made to learn about 3D game deveopment.
 ___
 ## **Libraries**
-- Three.js
-- GSAP
+- [Three.js](https://threejs.org/)
+- [GSAP](https://greensock.com/gsap/)
 
 <!--
 code block template
