@@ -359,6 +359,11 @@ function animationReset(id, startTime, change) {
       elem.style.animation = '';
    }, (startTime * 1000) + 20);
 }
+function initAll(delay) {
+   animationReset('introTitle', delay, 'Created by AvoRaDev');
+   cFall.delay = delay;
+   init()
+}
 
 // get random float
 function getRandFloat(min, max, dec = 16) {
