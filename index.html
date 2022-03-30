@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
    <meta charset="UTF-8">
-   <!--TODO - add favicon (something related to the player)-->
+   <link rel="icon" type="image/jpg" href="./img/favicon.jpg">
    <title>Island | Tech Demo</title>
    <link href="./style.css" rel="stylesheet">
    <style>
       /*
-      total time: 5s
+      total intro time: 5s
       safety buffer: 1s
       fade-in-out duration: 3s
       fade-out duration: 1s
@@ -33,26 +33,9 @@
          animation-delay: 2s;
       }
    </style>
-   <!--
-   <script>
-      // startTime is when the icon animation ends
-      // let startTime = 5.5;
-      function animationReset(id, startTime, change) {
-      let elem = document.querySelector(`#${id}`);
-         setTimeout(() => {
-            elem.innerHTML = '';
-            elem.style.animation = 'none';
-         }, startTime * 1000)
-         
-         setTimeout(() => {
-            elem.innerHTML= change;
-            elem.style.animation = '';
-         }, (startTime * 1000) + 10);
-      }
-   </script>
-   -->
 </head>
-<body onload="animationReset('introTitle', 5, 'Created by AvoRaDev'); cFall.delay = 5; init()">
+<!--initAll parameter is the delay caoused by the intro-->
+<body onload="initAll(5)">
    <!--debug textbox-->
    <div id="debugMenu"><p id="debugTxtbox"></p></div>
    
@@ -65,8 +48,9 @@
          <div>
             
             <div>
-               <h4 id="introTitle" class="intro-animation"> Made With </h4>
-               <!--<script> animationReset('introTitle', 5.5, 'Made by AvoRaDev') </script>-->
+               <h4 id="introTitle" class="intro-animation">
+                  Made With
+               </h4>
             </div>
             
          </div>
